@@ -1,0 +1,10 @@
+language: java
+
+env:
+  global:
+    secure: Mhqj/+8aLRug/RQnvUpC7j/kaxZ/AgDHTZtA5GlRe1cao0ZOLanHyYLLhP81lt4lV/ad11gQxc6IZYhN4W1BQOYkKv2j8I3Fr1giGCUIFCB9W7RCQYxkVCwYCxS4RLUWKrtgb3hLzU06TYpXY7P54E6LlAE67MFa+3cYq451MdA=
+
+notifications:
+  email: false
+
+script: mvn clean deploy

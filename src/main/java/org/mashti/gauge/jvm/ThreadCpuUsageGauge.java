@@ -30,8 +30,8 @@ public class ThreadCpuUsageGauge implements Gauge<Float> {
     @Override
     public Float get() {
 
-        final long time = System.nanoTime();
         final long total_thread_cpu_time = getTotalThreadCpuTime();
+        final long time = System.nanoTime();
         final double load = (total_thread_cpu_time - previous_thread_time.getAndSet(total_thread_cpu_time)) / ((double) (time - previous_time.getAndSet(time)) * AVAILABLE_PROCESSORS);
         return (float) load;
     }
@@ -47,7 +47,9 @@ public class ThreadCpuUsageGauge implements Gauge<Float> {
         if (THREAD_MX_BEAN.isThreadCpuTimeSupported()) {
             for (long thread_id : THREAD_MX_BEAN.getAllThreadIds()) {
                 final long cpu_time = THREAD_MX_BEAN.getThreadCpuTime(thread_id);
-                if (cpu_time != -1) { time += cpu_time; }
+                if (cpu_time != -1) {
+                    time += cpu_time;
+                }
             }
         }
         else {

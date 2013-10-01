@@ -1,3 +1,19 @@
+/**
+ * This file is part of gauge.
+ *
+ * gauge is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * gauge is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with gauge.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.mashti.gauge.util;
 
 /*
@@ -57,7 +73,9 @@ public class LongAdder extends Striped64 implements Serializable {
         if ((as = cells) != null || !casBase(b = base, b + x)) {
             boolean uncontended = true;
             int h = (hc = threadHashCode.get()).code;
-            if (as == null || (n = as.length) < 1 || (a = as[(n - 1) & h]) == null || !(uncontended = a.cas(v = a.value, v + x))) { retryUpdate(x, hc, uncontended); }
+            if (as == null || (n = as.length) < 1 || (a = as[(n - 1) & h]) == null || !(uncontended = a.cas(v = a.value, v + x))) {
+                retryUpdate(x, hc, uncontended);
+            }
         }
     }
 
@@ -90,7 +108,9 @@ public class LongAdder extends Striped64 implements Serializable {
             int n = as.length;
             for (int i = 0; i < n; ++i) {
                 Cell a = as[i];
-                if (a != null) { sum += a.value; }
+                if (a != null) {
+                    sum += a.value;
+                }
             }
         }
         return sum;

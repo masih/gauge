@@ -1,3 +1,19 @@
+/**
+ * This file is part of gauge.
+ *
+ * gauge is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * gauge is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with gauge.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.mashti.gauge.util;
 
 import java.io.File;
@@ -92,7 +108,8 @@ public class GaugeCsvCombiner {
                     processors_itterator.remove();
                 }
             }
-            writer.write(time_statistics.getSampleSize(), time_statistics.getMin(), time_statistics.getMean(), time_statistics.getMax(), time_statistics.getStandardDeviation(), value_statistics.getSampleSize(), value_statistics.getMin(), value_statistics.getMean(), value_statistics.getMax(), value_statistics.getStandardDeviation());
+            writer.write(time_statistics.getSampleSize(), time_statistics.getMin(), time_statistics.getMean(), time_statistics.getMax(), time_statistics.getStandardDeviation(), value_statistics.getSampleSize(), value_statistics.getMin(), value_statistics.getMean(), value_statistics.getMax(),
+                            value_statistics.getStandardDeviation());
             writer.flush();
 
         }
@@ -106,7 +123,7 @@ public class GaugeCsvCombiner {
 
     private CellProcessor[] getCellProcessors() {
 
-        return new CellProcessor[] {new ParseRelativeTime(new ConvertTime(TimeUnit.NANOSECONDS, TimeUnit.SECONDS)), new ParseDouble()};
+        return new CellProcessor[]{new ParseRelativeTime(new ConvertTime(TimeUnit.NANOSECONDS, TimeUnit.SECONDS)), new ParseDouble()};
     }
 
     class ParseRelativeTime extends ParseLong implements LongCellProcessor {

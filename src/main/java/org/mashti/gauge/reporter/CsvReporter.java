@@ -40,7 +40,13 @@ public class CsvReporter extends ScheduledReporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvReporter.class);
     private static final Charset UTF_8 = Charset.forName("UTF-8");
+    private static final File WORKING_DIRECTORY = new File(".");
     private final File directory;
+
+    public CsvReporter(final MetricRegistry registry) {
+
+        this(registry, WORKING_DIRECTORY);
+    }
 
     public CsvReporter(final MetricRegistry registry, File directory) {
 

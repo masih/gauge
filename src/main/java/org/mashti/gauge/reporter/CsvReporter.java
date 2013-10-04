@@ -52,6 +52,7 @@ public class CsvReporter extends ScheduledReporter {
 
         super(registry);
         this.directory = directory;
+        LOGGER.trace("CSV reporter directory is set to {}", directory);
     }
 
     @Override

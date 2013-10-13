@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with gauge.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.mashti.gauge.jvm;
 
 import java.lang.management.ManagementFactory;
@@ -27,13 +28,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** @author Masih Hajiarabderkani (mh638@st-andrews.ac.uk) */
-public class ThreadCpuUsageGauge implements Gauge<Float> {
+public class ThreadCpuUsageGauge implements Gauge<Double> {
 
     static final ThreadMXBean THREAD_MX_BEAN = ManagementFactory.getThreadMXBean();
     static final RuntimeMXBean RUNTIME_MX_BEAN = ManagementFactory.getRuntimeMXBean();
     static final OperatingSystemMXBean OPERATING_SYSTEM_MX_BEAN = ManagementFactory.getOperatingSystemMXBean();
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadCpuUsageGauge.class);
     private static final int AVAILABLE_PROCESSORS = OPERATING_SYSTEM_MX_BEAN.getAvailableProcessors();
+    public static final double ZERO = 0.0d;
     private final AtomicLong previous_time;
     private final AtomicLong previous_thread_time;
 
@@ -44,12 +46,12 @@ public class ThreadCpuUsageGauge implements Gauge<Float> {
     }
 
     @Override
-    public Float get() {
+    public Double get() {
 
         final long total_thread_cpu_time = getTotalThreadCpuTime();
         final long time = System.nanoTime();
         final double load = (total_thread_cpu_time - previous_thread_time.getAndSet(total_thread_cpu_time)) / ((double) (time - previous_time.getAndSet(time)) * AVAILABLE_PROCESSORS);
-        return (float) load;
+        return Math.max(load, ZERO);
     }
 
     static long getJvmStartTimeInNanos() {

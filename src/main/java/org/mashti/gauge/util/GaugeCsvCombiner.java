@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with gauge.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.mashti.gauge.util;
 
 import java.io.File;
@@ -70,7 +71,7 @@ public class GaugeCsvCombiner {
         return csvs.add(csv);
     }
 
-    public synchronized void combine(File destination) throws IOException {
+    public synchronized void combine(File destination, long bucket_size, TimeUnit bucket_unit) throws IOException {
 
         final List<CellProcessor[]> processors = new ArrayList<CellProcessor[]>();
         final List<CsvListReader> readers = new ArrayList<CsvListReader>();
@@ -83,9 +84,9 @@ public class GaugeCsvCombiner {
             readers.add(reader);
             reader.getHeader(true);
         }
-
+        //TODO implement time bucket
         final CsvListWriter writer = new CsvListWriter(new FileWriter(destination), CsvPreference.STANDARD_PREFERENCE);
-        writer.writeHeader("time_count", "time_min", "time_mean", "time_max", "time_stdev", "value_count", "value_min", "value_mean", "value_max", "value_stdev");
+        writer.writeHeader("time_bucket", "value_count", "value_min", "value_mean", "value_max", "value_stdev");
 
         while (!readers.isEmpty()) {
 
@@ -108,9 +109,14 @@ public class GaugeCsvCombiner {
                     processors_itterator.remove();
                 }
             }
-            writer.write(time_statistics.getSampleSize(), time_statistics.getMin(), time_statistics.getMean(), time_statistics.getMax(), time_statistics.getStandardDeviation(), value_statistics.getSampleSize(), value_statistics.getMin(), value_statistics.getMean(), value_statistics.getMax(),
-                            value_statistics.getStandardDeviation());
-            writer.flush();
+
+            if (time_statistics.getSampleSize() != 0 && value_statistics.getSampleSize() != 0) {
+                final Long mean_time = time_statistics.getMean().longValue();
+                final long normalized_mean_time = mean_time;//bucket_unit.convert(mean_time, TimeUnit.NANOSECONDS);
+                final long time_bucket = (long) (Math.floor(normalized_mean_time / bucket_size) * bucket_size);
+                writer.write(time_bucket, value_statistics.getSampleSize(), value_statistics.getMin(), value_statistics.getMean(), value_statistics.getMax(), value_statistics.getStandardDeviation());
+                writer.flush();
+            }
 
         }
         writer.close();
@@ -123,7 +129,7 @@ public class GaugeCsvCombiner {
 
     private CellProcessor[] getCellProcessors() {
 
-        return new CellProcessor[]{new ParseRelativeTime(new ConvertTime(TimeUnit.NANOSECONDS, TimeUnit.SECONDS)), new ParseDouble()};
+        return new CellProcessor[] {new ParseRelativeTime(new ConvertTime(TimeUnit.NANOSECONDS, TimeUnit.SECONDS)), new ParseDouble()};
     }
 
     class ParseRelativeTime extends ParseLong implements LongCellProcessor {

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with gauge.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.mashti.gauge.util;
 
 import java.awt.Color;
@@ -37,8 +38,8 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYErrorRenderer;
 import org.jfree.data.xy.IntervalXYDataset;
-import org.jfree.data.xy.XYIntervalSeries;
-import org.jfree.data.xy.XYIntervalSeriesCollection;
+import org.jfree.data.xy.YIntervalSeries;
+import org.jfree.data.xy.YIntervalSeriesCollection;
 import org.mashti.sight.PlainChartTheme;
 import org.mashti.sina.distribution.statistic.Statistics;
 import org.supercsv.io.CsvListReader;
@@ -55,16 +56,18 @@ public class GaugeLineChart {
 
     private final String title;
     private final File csv;
+    private final JFreeChart chart;
+    private final YIntervalSeries series;
 
     public GaugeLineChart(String title, File csv) throws IOException {
 
         this.title = title;
         this.csv = csv;
+        series = getYIntervalSeries();
+        chart = createChart(createDataset(series));
     }
 
-    public void saveAsJFC(File destination) throws IOException {
-
-        final JFreeChart chart = createChart(createDataset());
+    public static void saveAsJFC(JFreeChart chart, File destination) throws IOException {
 
         ObjectOutputStream out = null;
         try {
@@ -80,64 +83,6 @@ public class GaugeLineChart {
         }
     }
 
-    public void saveAsSVG(File destination) throws IOException {
-
-        final JFreeChart chart = createChart(createDataset());
-        final Rectangle bounds = new Rectangle(0, 0, 600, 400);
-        exportChartAsSVG(chart, bounds, destination);
-    }
-
-    private JFreeChart createChart(IntervalXYDataset intervalxydataset) {
-
-        NumberAxis numberaxis = new NumberAxis("Time Thrugh Experiment");
-        NumberAxis numberaxis1 = new NumberAxis(title);
-        XYErrorRenderer xyerrorrenderer = new XYErrorRenderer();
-        xyerrorrenderer.setBaseLinesVisible(true);
-        XYPlot xyplot = new XYPlot(intervalxydataset, numberaxis, numberaxis1, xyerrorrenderer);
-        xyplot.setDomainPannable(true);
-        xyplot.setRangePannable(true);
-        xyplot.setBackgroundPaint(Color.lightGray);
-        xyplot.setDomainGridlinePaint(Color.white);
-        xyplot.setRangeGridlinePaint(Color.white);
-        JFreeChart jfreechart = new JFreeChart(title, xyplot);
-        ChartUtilities.applyCurrentTheme(jfreechart);
-        return jfreechart;
-    }
-
-    private IntervalXYDataset createDataset() throws IOException {
-
-        final XYIntervalSeriesCollection xyintervalseriescollection = new XYIntervalSeriesCollection();
-        final XYIntervalSeries xyintervalseries = new XYIntervalSeries("Series 1");
-
-        final CsvListReader reader = new CsvListReader(new BufferedReader(new FileReader(csv)), CsvPreference.STANDARD_PREFERENCE);
-        reader.getHeader(true);
-
-        List<String> row;
-
-        while ((row = reader.read()) != null) {
-
-            final Long t_count = Long.valueOf(row.get(0));
-            final Double t_mean = Double.valueOf(row.get(2));
-            final Double t_stdev = Double.valueOf(row.get(4));
-            final Double t_ci = t_count > 1 ? Statistics.confidenceInterval(t_count, t_stdev, 0.95D).doubleValue() : 0;
-            final Double t_low = t_mean - t_ci;
-            final Double t_high = t_mean + t_ci;
-
-            final Long v_count = Long.valueOf(row.get(5));
-            final Double v_mean = Double.valueOf(row.get(7));
-            final Double v_stdev = Double.valueOf(row.get(9));
-            final Double v_ci = v_count > 1 ? Statistics.confidenceInterval(v_count, v_stdev, 0.95D).doubleValue() : 0;
-            final Double v_low = v_mean - v_ci;
-            final Double v_high = v_mean + v_ci;
-
-            xyintervalseries.add(t_mean, t_low, t_high, v_mean, v_low, v_high);
-        }
-        reader.close();
-
-        xyintervalseriescollection.addSeries(xyintervalseries);
-        return xyintervalseriescollection;
-    }
-
     /**
      * Exports a JFreeChart to a SVG file.
      *
@@ -146,23 +91,95 @@ public class GaugeLineChart {
      * @param svgFile the output file.
      * @throws IOException if writing the svgFile fails.
      */
-    void exportChartAsSVG(JFreeChart chart, Rectangle bounds, File svgFile) throws IOException {
+    public static void saveAsSVG(JFreeChart chart, Rectangle bounds, File svgFile) throws IOException {
 
         // Get a DOMImplementation and create an XML document
-        DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
-        Document document = domImpl.createDocument(null, "svg", null);
+        final DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
+        final Document document = domImpl.createDocument(null, "svg", null);
+        final SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+        final OutputStream outputStream = new FileOutputStream(svgFile);
+        final Writer out;
+        try {
+            out = new OutputStreamWriter(outputStream, "UTF-8");
+            chart.draw(svgGenerator, bounds);
+            svgGenerator.stream(out, true /* use css */);
+            outputStream.flush();
+        }
+        finally {
+            outputStream.close();
+        }
+    }
 
-        // Create an instance of the SVG Generator
-        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+    public JFreeChart getChart() {
 
-        // draw the chart in the SVG generator
-        chart.draw(svgGenerator, bounds);
+        return chart;
+    }
 
-        // Write svg file
-        OutputStream outputStream = new FileOutputStream(svgFile);
-        Writer out = new OutputStreamWriter(outputStream, "UTF-8");
-        svgGenerator.stream(out, true /* use css */);
-        outputStream.flush();
-        outputStream.close();
+    public YIntervalSeries getSeries() {
+
+        return series;
+    }
+
+    private JFreeChart createChart(IntervalXYDataset intervalxydataset) {
+
+        NumberAxis x_axis = new NumberAxis("Time Thrugh Experiment (s)");
+        NumberAxis y_axis = new NumberAxis(title);
+
+        XYErrorRenderer xyerrorrenderer = new XYErrorRenderer();
+        xyerrorrenderer.setBaseLinesVisible(true);
+
+        xyerrorrenderer.setDrawYError(true);
+        XYPlot xyplot = new XYPlot(intervalxydataset, x_axis, y_axis, xyerrorrenderer);
+        xyplot.setDomainPannable(true);
+        xyplot.setRangePannable(true);
+        xyplot.setBackgroundPaint(Color.lightGray);
+        xyplot.setDomainGridlinePaint(Color.white);
+        xyplot.setRangeGridlinePaint(Color.white);
+        xyplot.getRangeAxis().setLowerBound(0);
+        JFreeChart jfreechart = new JFreeChart(title, xyplot);
+
+        ChartUtilities.applyCurrentTheme(jfreechart);
+        return jfreechart;
+    }
+
+    private IntervalXYDataset createDataset(final YIntervalSeries y_interval_series) {
+
+        final YIntervalSeriesCollection series_collection = new YIntervalSeriesCollection();
+
+        series_collection.addSeries(y_interval_series);
+        return series_collection;
+    }
+
+    private YIntervalSeries getYIntervalSeries() throws IOException {
+
+        final YIntervalSeries y_interval_series = new YIntervalSeries(csv.getName().replace(".csv", "").replace("_", " ").replace(" gauge", ""));
+
+        final CsvListReader reader = new CsvListReader(new BufferedReader(new FileReader(csv)), CsvPreference.STANDARD_PREFERENCE);
+        reader.getHeader(true);
+
+        List<String> row;
+
+        while ((row = reader.read()) != null) {
+
+            final Long t_bucket = Long.valueOf(row.get(0));
+
+            final Long v_count = Long.valueOf(row.get(1));
+            Double v_mean = Double.valueOf(row.get(3));
+            if (v_mean.equals(Double.NaN)) {
+                v_mean = 0D;
+            }
+            final Double v_stdev = Double.valueOf(row.get(5));
+            Double v_ci = v_count > 1 ? Statistics.confidenceInterval(v_count, v_stdev, 0.95D).doubleValue() : 0;
+            if (v_ci.equals(Double.NaN)) {
+                v_ci = 0D;
+            }
+            final Double v_low = v_mean - v_ci;
+            final Double v_high = v_mean + v_ci;
+
+            y_interval_series.add(t_bucket, v_mean, v_low, v_high);
+        }
+
+        reader.close();
+        return y_interval_series;
     }
 }

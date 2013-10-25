@@ -68,11 +68,11 @@ public class Timer implements Metric {
 
     public class Time {
 
-        private final long start_time;
+        private final long start_time_nanos;
 
         private Time() {
 
-            start_time = System.nanoTime();
+            start_time_nanos = System.nanoTime();
         }
 
         /**
@@ -82,9 +82,19 @@ public class Timer implements Metric {
          */
         public long stop() {
 
-            final long elapsed = System.nanoTime() - start_time;
+            final long elapsed = System.nanoTime() - start_time_nanos;
             update(elapsed, TimeUnit.NANOSECONDS);
             return elapsed;
+        }
+
+        /**
+         * Gets the start time in nanoseconds.
+         *
+         * @return the start time in nanoseconds
+         */
+        public long getStartTimeInNanos() {
+
+            return start_time_nanos;
         }
     }
 }

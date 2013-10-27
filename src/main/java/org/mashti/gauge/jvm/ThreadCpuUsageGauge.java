@@ -18,61 +18,49 @@
 package org.mashti.gauge.jvm;
 
 import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadMXBean;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import org.mashti.gauge.Gauge;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static java.lang.Math.max;
 
 /** @author Masih Hajiarabderkani (mh638@st-andrews.ac.uk) */
 public class ThreadCpuUsageGauge implements Gauge<Double> {
 
     static final ThreadMXBean THREAD_MX_BEAN = ManagementFactory.getThreadMXBean();
     static final RuntimeMXBean RUNTIME_MX_BEAN = ManagementFactory.getRuntimeMXBean();
-    static final OperatingSystemMXBean OPERATING_SYSTEM_MX_BEAN = ManagementFactory.getOperatingSystemMXBean();
-    private static final Logger LOGGER = LoggerFactory.getLogger(ThreadCpuUsageGauge.class);
-    private static final int AVAILABLE_PROCESSORS = OPERATING_SYSTEM_MX_BEAN.getAvailableProcessors();
-    public static final double ZERO = 0.0d;
-    private final AtomicLong previous_time;
-    private final AtomicLong previous_thread_time;
+    static final long JVM_START_TIME_NANOS = TimeUnit.NANOSECONDS.convert(RUNTIME_MX_BEAN.getStartTime(), TimeUnit.MILLISECONDS);
+    private final AtomicLong previous_start_time;
+    private final AtomicLong previous_total_cpu_time;
 
     public ThreadCpuUsageGauge() {
 
-        previous_time = new AtomicLong(getJvmStartTimeInNanos());
-        previous_thread_time = new AtomicLong(getTotalThreadCpuTime());
+        if (!THREAD_MX_BEAN.isThreadCpuTimeSupported()) { throw new IllegalStateException("Thread CPU time is not supported by this JVM"); }
+        previous_start_time = new AtomicLong(JVM_START_TIME_NANOS);
+        previous_total_cpu_time = new AtomicLong();
     }
 
     @Override
     public Double get() {
 
-        final long total_thread_cpu_time = getTotalThreadCpuTime();
-        final long time = System.nanoTime();
-        final double load = (total_thread_cpu_time - previous_thread_time.getAndSet(total_thread_cpu_time)) / ((double) (time - previous_time.getAndSet(time)) * AVAILABLE_PROCESSORS);
-        return Math.max(load, ZERO);
-    }
-
-    static long getJvmStartTimeInNanos() {
-
-        return TimeUnit.NANOSECONDS.convert(RUNTIME_MX_BEAN.getStartTime(), TimeUnit.MILLISECONDS);
+        final long start_time = System.nanoTime();
+        final long total_cpu_time = getTotalThreadCpuTime();
+        final long previous_total_cpu_time = this.previous_total_cpu_time.getAndSet(total_cpu_time);
+        final long previous_start_time = this.previous_start_time.getAndSet(start_time);
+        return (double) (total_cpu_time - previous_total_cpu_time) / (start_time - previous_start_time);
     }
 
     static long getTotalThreadCpuTime() {
 
-        long time = 0;
-        if (THREAD_MX_BEAN.isThreadCpuTimeSupported()) {
-            for (long thread_id : THREAD_MX_BEAN.getAllThreadIds()) {
-                final long cpu_time = THREAD_MX_BEAN.getThreadCpuTime(thread_id);
-                if (cpu_time != -1) {
-                    time += cpu_time;
-                }
-            }
+        long total_cpu_time = 0;
+        for (long thread_id : THREAD_MX_BEAN.getAllThreadIds()) {
+
+            final long cpu_time = THREAD_MX_BEAN.getThreadCpuTime(thread_id);
+            total_cpu_time += max(cpu_time, 0);
         }
-        else {
-            LOGGER.warn("Thread CPU time is not supported by this JVM");
-        }
-        return time;
+        return total_cpu_time;
     }
+
 }

@@ -30,7 +30,6 @@ public class MetricRegistry {
     public MetricRegistry(String name) {
 
         this.name = name;
-
         metrics = new ConcurrentSkipListMap<String, Metric>();
     }
 

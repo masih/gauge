@@ -21,7 +21,12 @@ import org.mashti.gauge.util.LongAdder;
 /** @author Masih Hajiarabderkani (mh638@st-andrews.ac.uk) */
 public class Counter implements Metric {
 
-    LongAdder long_adder = new LongAdder();
+    private final LongAdder adder;
+
+    public Counter() {
+
+        adder = new LongAdder();
+    }
 
     public void increment() {
 
@@ -40,16 +45,16 @@ public class Counter implements Metric {
 
     public void add(long n) {
 
-        long_adder.add(n);
+        adder.add(n);
     }
 
     public long get() {
 
-        return long_adder.sum();
+        return adder.sum();
     }
 
     public long getAndReset() {
 
-        return long_adder.sumThenReset();
+        return adder.sumThenReset();
     }
 }

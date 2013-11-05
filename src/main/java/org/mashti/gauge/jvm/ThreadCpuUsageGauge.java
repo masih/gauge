@@ -42,6 +42,12 @@ public class ThreadCpuUsageGauge implements Gauge<Double> {
         previous_total_cpu_time = new AtomicLong();
     }
 
+    /**
+     * Gets the percentage of CPU time that is collectively consumed by threads in the current JVM.
+     * The percentage is within range {@code 0.0 <= cpu_usage_percentage <= 1.0}.
+     *
+     * @return the percentage of CPU time that is collectively consumed by threads in the current JVM as a number between {@code 0.0} and {@code 1.0} (inclusive)
+     */
     @Override
     public Double get() {
 
@@ -63,5 +69,4 @@ public class ThreadCpuUsageGauge implements Gauge<Double> {
         }
         return total_cpu_time;
     }
-
 }

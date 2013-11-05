@@ -49,7 +49,8 @@ public class ThreadCpuUsageGauge implements Gauge<Double> {
         final long total_cpu_time = getTotalThreadCpuTime();
         final long previous_total_cpu_time = this.previous_total_cpu_time.getAndSet(total_cpu_time);
         final long previous_start_time = this.previous_start_time.getAndSet(start_time);
-        return (double) (total_cpu_time - previous_total_cpu_time) / (start_time - previous_start_time);
+        final double usage = (double) (total_cpu_time - previous_total_cpu_time) / (start_time - previous_start_time);
+        return max(usage, 0);
     }
 
     static long getTotalThreadCpuTime() {

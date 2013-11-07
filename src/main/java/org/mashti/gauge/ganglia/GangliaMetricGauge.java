@@ -81,7 +81,7 @@ public class GangliaMetricGauge implements Gauge<String> {
         }
         catch (Exception e) {
             LOGGER.error("failed to query {} on host {}:{}. cause: {}", query, host_name, port, e);
-            LOGGER.error("failure to query ganglia", e);
+            LOGGER.debug("failure to query ganglia", e);
             result = null;
         }
         finally {

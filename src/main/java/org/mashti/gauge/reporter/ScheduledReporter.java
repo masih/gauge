@@ -67,7 +67,6 @@ public abstract class ScheduledReporter implements Reporter {
 
         if (isReportScheduled()) {
             scheduled_report.cancel(false);
-            report();
         }
     }
 

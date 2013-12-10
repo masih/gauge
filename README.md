@@ -9,3 +9,7 @@ The architecture of this framework is inspired by the powerful [Metrics](http://
 
 ## License
 The project is licensed under GNU GPL version 3.0.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mashti/gauge/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+

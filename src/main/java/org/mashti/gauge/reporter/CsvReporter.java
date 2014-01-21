@@ -14,16 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with gauge.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.mashti.gauge.reporter;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.IOUtils;
 import org.mashti.gauge.Counter;
 import org.mashti.gauge.Gauge;
 import org.mashti.gauge.Metric;
@@ -39,9 +41,8 @@ import org.slf4j.LoggerFactory;
 public class CsvReporter extends ScheduledReporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvReporter.class);
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
-    private static final File WORKING_DIRECTORY = new File(".");
-    private final File directory;
+    private static final File WORKING_DIRECTORY = new File(System.getProperty("user.dir"));
+    private final Path reports_home;
 
     public CsvReporter(final MetricRegistry registry) {
 
@@ -50,9 +51,14 @@ public class CsvReporter extends ScheduledReporter {
 
     public CsvReporter(final MetricRegistry registry, File directory) {
 
+        this(registry, directory.toPath());
+    }
+
+    public CsvReporter(final MetricRegistry registry, Path reports_home) {
+
         super(registry);
-        this.directory = directory;
-        LOGGER.trace("CSV reporter directory is set to {}", directory);
+        this.reports_home = reports_home;
+        LOGGER.debug("CSV reporter directory is set to {}", reports_home);
     }
 
     @Override
@@ -92,17 +98,13 @@ public class CsvReporter extends ScheduledReporter {
     private void reportTimer(long timestamp, String name, Timer timer) {
 
         final Statistics statistics = timer.getAndReset();
-        report(timestamp, name, "count,min,mean,max,standard_deviation,0.1th_p,1th_p,2th_p,5th_p,25th_p,50th_p,75th_p,95th_p,98th_p,99th_p,99.9th_p,unit", "%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%s", statistics.getSampleSize(), statistics.getMin(), statistics.getMean(),
-                        statistics.getMax(), statistics.getStandardDeviation(), statistics.getPercentile(0.1), statistics.getPercentile(1), statistics.getPercentile(2), statistics.getPercentile(5), statistics.getPercentile(25), statistics.getPercentile(50), statistics.getPercentile(75),
-                        statistics.getPercentile(95), statistics.getPercentile(98), statistics.getPercentile(99), statistics.getPercentile(99.9), timer.getUnit());
+        report(timestamp, name, "count,min,mean,max,standard_deviation,0.1th_p,1th_p,2th_p,5th_p,25th_p,50th_p,75th_p,95th_p,98th_p,99th_p,99.9th_p,unit", "%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%s", statistics.getSampleSize(), statistics.getMin(), statistics.getMean(), statistics.getMax(), statistics.getStandardDeviation(), statistics.getPercentile(0.1), statistics.getPercentile(1), statistics.getPercentile(2), statistics.getPercentile(5), statistics.getPercentile(25), statistics.getPercentile(50), statistics.getPercentile(75), statistics.getPercentile(95), statistics.getPercentile(98), statistics.getPercentile(99), statistics.getPercentile(99.9), timer.getUnit());
     }
 
     private void reportSampler(long timestamp, String name, Sampler sampler) {
 
         final Statistics statistics = sampler.getAndReset();
-        report(timestamp, name, "count,min,mean,max,standard_deviation,0.1th_p,1th_p,2th_p,5th_p,25th_p,50th_p,75th_p,95th_p,98th_p,99th_p,99.9th_p", "%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", statistics.getSampleSize(), statistics.getMin(), statistics.getMean(), statistics.getMax(),
-                        statistics.getStandardDeviation(), statistics.getPercentile(0.1), statistics.getPercentile(1), statistics.getPercentile(2), statistics.getPercentile(5), statistics.getPercentile(25), statistics.getPercentile(50), statistics.getPercentile(75), statistics.getPercentile(95),
-                        statistics.getPercentile(98), statistics.getPercentile(99), statistics.getPercentile(99.9));
+        report(timestamp, name, "count,min,mean,max,standard_deviation,0.1th_p,1th_p,2th_p,5th_p,25th_p,50th_p,75th_p,95th_p,98th_p,99th_p,99.9th_p", "%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", statistics.getSampleSize(), statistics.getMin(), statistics.getMean(), statistics.getMax(), statistics.getStandardDeviation(), statistics.getPercentile(0.1), statistics.getPercentile(1), statistics.getPercentile(2), statistics.getPercentile(5), statistics.getPercentile(25), statistics.getPercentile(50), statistics.getPercentile(75), statistics.getPercentile(95), statistics.getPercentile(98), statistics.getPercentile(99), statistics.getPercentile(99.9));
     }
 
     private void reportRate(long timestamp, String name, Rate rate) {
@@ -123,21 +125,16 @@ public class CsvReporter extends ScheduledReporter {
     private void report(long timestamp, String name, String header, String line, Object... values) {
 
         try {
-            final File file = new File(directory, name + ".csv");
-            final boolean already_exists = file.exists();
-            if (already_exists || file.createNewFile()) {
-                PrintWriter out = null;
-                try {
-                    out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, true), UTF_8));
-                    if (!already_exists) {
-                        out.println("time," + header);
-                    }
-                    out.printf(String.format("%d,%s%n", timestamp, line), values);
-                }
-                finally {
-                    IOUtils.closeQuietly(out);
-                }
+
+            final Path report_path = reports_home.resolve(name + ".csv");
+            final List<String> lines = new ArrayList<>();
+
+            if (Files.notExists(report_path)) {
+                lines.add("time," + header);
             }
+
+            lines.add(String.format(String.format("%d,%s", timestamp, line), values));
+            Files.write(report_path, lines, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
         }
         catch (IOException e) {
             LOGGER.warn("Error writing to {}", name, e);

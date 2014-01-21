@@ -3,3 +3,4 @@ target/
 .DS_Store?
 *.iml
 .Spotlight-V100
+.idea

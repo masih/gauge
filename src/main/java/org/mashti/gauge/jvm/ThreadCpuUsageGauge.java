@@ -32,6 +32,7 @@ public class ThreadCpuUsageGauge implements Gauge<Double> {
     static final ThreadMXBean THREAD_MX_BEAN = ManagementFactory.getThreadMXBean();
     static final RuntimeMXBean RUNTIME_MX_BEAN = ManagementFactory.getRuntimeMXBean();
     static final long JVM_START_TIME_NANOS = TimeUnit.NANOSECONDS.convert(RUNTIME_MX_BEAN.getStartTime(), TimeUnit.MILLISECONDS);
+    static final int NUMBER_OF_PROCESSORS = Runtime.getRuntime().availableProcessors();
     private final AtomicLong previous_start_time;
     private final AtomicLong previous_total_cpu_time;
 
@@ -56,7 +57,7 @@ public class ThreadCpuUsageGauge implements Gauge<Double> {
         final long previous_total_cpu_time = this.previous_total_cpu_time.getAndSet(total_cpu_time);
         final long previous_start_time = this.previous_start_time.getAndSet(start_time);
         final double usage = (double) (total_cpu_time - previous_total_cpu_time) / (start_time - previous_start_time);
-        return max(usage, 0);
+        return max(usage, 0) / NUMBER_OF_PROCESSORS;
     }
 
     static long getTotalThreadCpuTime() {

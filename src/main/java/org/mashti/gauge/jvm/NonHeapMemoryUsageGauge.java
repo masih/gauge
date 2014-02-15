@@ -19,24 +19,23 @@ package org.mashti.gauge.jvm;
 
 import org.mashti.gauge.Gauge;
 
+import static org.mashti.gauge.jvm.HeapMemoryUsageGauge.MEMORY_MX_BEAN;
+
 /**
- * Measures heap and non-heap memory usage of this JVM in bytes.
+ * Measures non-heap  memory usage of this JVM in bytes.
  *
  * @author Masih Hajiarabderkani (mh638@st-andrews.ac.uk)
  */
-public class MemoryUsageGauge implements Gauge<Long> {
-
-    private static final HeapMemoryUsageGauge HEAP_MEMORY_USAGE_GAUGE = new HeapMemoryUsageGauge();
-    private static final NonHeapMemoryUsageGauge NON_HEAP_MEMORY_USAGE_GAUGE = new NonHeapMemoryUsageGauge();
+public class NonHeapMemoryUsageGauge implements Gauge<Long> {
 
     /**
-     * Gets the current usage of the heap and the non-heap memory in bytes.
+     * Gets the current usage of the non-heap memory in bytes.
      *
-     * @return the current usage of the heap and the non-heap memory in bytes
+     * @return the current usage of the non-heap memory in bytes
      */
     @Override
     public Long get() {
 
-        return HEAP_MEMORY_USAGE_GAUGE.get() + NON_HEAP_MEMORY_USAGE_GAUGE.get();
+        return MEMORY_MX_BEAN.getNonHeapMemoryUsage().getUsed();
     }
 }

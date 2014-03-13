@@ -12,7 +12,4 @@ The main difference between Gauge and [Metrics][metrics] is that Gauge allows th
 ## License
 The project is licensed under GNU GPL version 3.0.
 
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mashti/gauge/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
 [metrics]:http://metrics.codahale.com/

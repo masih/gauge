@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with gauge.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.mashti.gauge;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,7 +35,7 @@ public class Sampler implements Metric {
         return statistics.getAndSet(new Statistics());
     }
 
-    public void update(long sample) {
+    public void update(double sample) {
 
         get().addSample(sample);
     }

@@ -53,14 +53,14 @@ public class ThreadCpuUsageGauge implements Gauge<Double> {
     public Double get() {
 
         final long start_time = System.nanoTime();
-        final long total_cpu_time = getTotalThreadCpuTime();
+        final long total_cpu_time = getTotalThreadCpuTimeInNanos();
         final long previous_total_cpu_time = this.previous_total_cpu_time.getAndSet(total_cpu_time);
         final long previous_start_time = this.previous_start_time.getAndSet(start_time);
         final double usage = (double) (total_cpu_time - previous_total_cpu_time) / (start_time - previous_start_time);
         return max(usage, 0) / NUMBER_OF_PROCESSORS;
     }
 
-    static long getTotalThreadCpuTime() {
+    static long getTotalThreadCpuTimeInNanos() {
 
         long total_cpu_time = 0;
         for (long thread_id : THREAD_MX_BEAN.getAllThreadIds()) {

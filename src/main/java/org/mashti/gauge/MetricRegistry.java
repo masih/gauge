@@ -14,37 +14,59 @@
  * You should have received a copy of the GNU General Public License
  * along with gauge.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.mashti.gauge;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /** @author Masih Hajiarabderkani (mh638@st-andrews.ac.uk) */
 public class MetricRegistry {
 
-    private final ConcurrentSkipListMap<String, Metric> metrics;
+    private final List<RegisteredMetric> registered_metrics;
     private final String name;
 
     public MetricRegistry(String name) {
 
         this.name = name;
-        metrics = new ConcurrentSkipListMap<String, Metric>();
+        registered_metrics = new ArrayList<>();
     }
 
-    public boolean register(String name, Metric metric) {
+    public synchronized boolean register(String name, Metric metric) {
 
-        return metrics.putIfAbsent(name, metric) == null;
+        return registered_metrics.add(new RegisteredMetric(name, metric));
     }
 
-    public Set<Map.Entry<String, Metric>> getMetrics() {
+    public List<RegisteredMetric> getRegisteredMetrics() {
 
-        return new CopyOnWriteArraySet<Map.Entry<String, Metric>>(metrics.entrySet());
+        return new CopyOnWriteArrayList<RegisteredMetric>(registered_metrics);
     }
 
     public String getName() {
 
         return name;
+    }
+
+    public static class RegisteredMetric {
+
+        private final String name;
+        private final Metric metric;
+
+        RegisteredMetric(final String name, final Metric metric) {
+
+            this.name = name;
+            this.metric = metric;
+        }
+
+        public String getName() {
+
+            return name;
+        }
+
+        public Metric getMetric() {
+
+            return metric;
+        }
     }
 }

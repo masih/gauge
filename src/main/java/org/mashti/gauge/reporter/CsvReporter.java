@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.mashti.gauge.Counter;
 import org.mashti.gauge.Gauge;
 import org.mashti.gauge.Metric;
@@ -65,9 +64,9 @@ public class CsvReporter extends ScheduledReporter {
     public void report() {
 
         final long timestamp = System.nanoTime();
-        for (Map.Entry<String, Metric> entry : getRegistry().getMetrics()) {
-            final String name = entry.getKey();
-            final Metric metric = entry.getValue();
+        for (MetricRegistry.RegisteredMetric registered_metric : getRegistry().getRegisteredMetrics()) {
+            final String name = registered_metric.getName();
+            final Metric metric = registered_metric.getMetric();
 
             if (metric instanceof Counter) {
                 Counter counter = (Counter) metric;

@@ -109,9 +109,9 @@ public class GangliaMetricGauge implements Gauge<String> {
         return new Socket(host_name, port);
     }
 
-    private String constructQuery(final String cluster_name, final String node_name, final String metric_name) {
+    private static String constructQuery(final String cluster_name, final String node_name, final String metric_name) {
 
-        return new StringBuilder().append(DELIMITER).append(cluster_name).append(DELIMITER).append(node_name).append(DELIMITER).append(metric_name).toString();
+        return String.format("%s%s%s%s%s%s", DELIMITER, cluster_name, DELIMITER, node_name, DELIMITER, metric_name);
     }
 
     private class MetricValueHandler extends DefaultHandler {

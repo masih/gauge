@@ -18,29 +18,30 @@
 package org.mashti.gauge;
 
 import java.util.concurrent.atomic.AtomicReference;
-import org.mashti.sina.distribution.statistic.Statistics;
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
 /** @author Masih Hajiarabderkani (mh638@st-andrews.ac.uk) */
 public class Sampler implements Metric {
 
-    private final AtomicReference<Statistics> statistics;
+    public static final int WINDOW_LIMIT = 10000;
+    private final AtomicReference<SynchronizedDescriptiveStatistics> statistics;
 
     public Sampler() {
 
-        statistics = new AtomicReference<Statistics>(new Statistics());
+        statistics = new AtomicReference<SynchronizedDescriptiveStatistics>(new SynchronizedDescriptiveStatistics(WINDOW_LIMIT));
     }
 
-    public Statistics getAndReset() {
+    public SynchronizedDescriptiveStatistics getAndReset() {
 
-        return statistics.getAndSet(new Statistics());
+        return statistics.getAndSet(new SynchronizedDescriptiveStatistics(WINDOW_LIMIT));
     }
 
     public void update(double sample) {
 
-        get().addSample(sample);
+        get().addValue(sample);
     }
 
-    protected Statistics get() {
+    protected SynchronizedDescriptiveStatistics get() {
 
         return statistics.get();
     }

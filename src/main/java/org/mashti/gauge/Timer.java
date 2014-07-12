@@ -17,7 +17,7 @@
 package org.mashti.gauge;
 
 import java.util.concurrent.TimeUnit;
-import org.mashti.sina.distribution.statistic.Statistics;
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
 /** @author Masih Hajiarabderkani (mh638@st-andrews.ac.uk) */
 public class Timer implements Metric {
@@ -41,7 +41,7 @@ public class Timer implements Metric {
         sampler.update(normalizeUnit(length, unit));
     }
 
-    public Statistics getAndReset() {
+    public SynchronizedDescriptiveStatistics getAndReset() {
 
         return sampler.getAndReset();
     }
@@ -56,7 +56,7 @@ public class Timer implements Metric {
         return unit;
     }
 
-    protected Statistics get() {
+    protected SynchronizedDescriptiveStatistics get() {
 
         return sampler.get();
     }

@@ -17,56 +17,50 @@
 
 package org.mashti.gauge;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Masih Hajiarabderkani (mh638@st-andrews.ac.uk) */
 public class MetricRegistry {
 
-    private final List<RegisteredMetric> registered_metrics;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetricRegistry.class);
+    private final Map<String, Metric> registered_metrics;
     private final String name;
 
     public MetricRegistry(String name) {
 
         this.name = name;
-        registered_metrics = new ArrayList<>();
+        registered_metrics = new HashMap<>();
     }
 
-    public synchronized boolean register(String name, Metric metric) {
+    public Metric register(String name, Metric metric) {
 
-        return registered_metrics.add(new RegisteredMetric(name, metric));
+        return registered_metrics.put(name, metric);
     }
 
-    public List<RegisteredMetric> getRegisteredMetrics() {
+    public synchronized void registerAll(MetricSet metric_set) {
 
-        return new CopyOnWriteArrayList<RegisteredMetric>(registered_metrics);
+        for (Map.Entry<String, Metric> metric_entry : metric_set.getMetrics().entrySet()) {
+
+            final String name = metric_entry.getKey();
+            final Metric metric = metric_entry.getValue();
+
+            final Metric replaced = register(name, metric);
+            if (replaced != null) {
+                LOGGER.warn("metric named {} replaced {}", name, replaced);
+            }
+        }
+    }
+
+    public Map<String, Metric> getRegisteredMetrics() {
+
+        return registered_metrics;
     }
 
     public String getName() {
 
         return name;
-    }
-
-    public static class RegisteredMetric {
-
-        private final String name;
-        private final Metric metric;
-
-        RegisteredMetric(final String name, final Metric metric) {
-
-            this.name = name;
-            this.metric = metric;
-        }
-
-        public String getName() {
-
-            return name;
-        }
-
-        public Metric getMetric() {
-
-            return metric;
-        }
     }
 }

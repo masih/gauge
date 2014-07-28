@@ -41,6 +41,11 @@ public class MetricSet {
         return metrics.put(name, metric);
     }
 
+    protected void putAllMetrics(MetricSet metric_set) {
+
+        metrics.putAll(metric_set.getMetrics());
+    }
+
     public Map<String, Metric> getMetrics() {
 
         return metrics;

@@ -14,9 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with gauge.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.mashti.gauge;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -30,7 +32,7 @@ public class MetricSet {
 
     public MetricSet() {
 
-        metrics = new HashMap<>();
+        metrics = new LinkedHashMap<>(); // respect insertion order
 
     }
 

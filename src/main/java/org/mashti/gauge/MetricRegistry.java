@@ -17,7 +17,7 @@
 
 package org.mashti.gauge;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class MetricRegistry {
     public MetricRegistry(String name) {
 
         this.name = name;
-        registered_metrics = new HashMap<>();
+        registered_metrics = new LinkedHashMap<>(); // respect insertion order
     }
 
     public Metric register(String name, Metric metric) {

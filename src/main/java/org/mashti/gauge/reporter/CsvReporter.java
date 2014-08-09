@@ -26,6 +26,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 import org.mashti.gauge.Counter;
 import org.mashti.gauge.Gauge;
@@ -43,6 +44,8 @@ public class CsvReporter extends ScheduledReporter {
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvReporter.class);
     private static final File WORKING_DIRECTORY = new File(System.getProperty("user.dir"));
     private final Path reports_home;
+    private final AtomicLong report_counter = new AtomicLong();
+    private boolean count_as_timestamp;
 
     public CsvReporter(final MetricRegistry registry) {
 
@@ -61,11 +64,17 @@ public class CsvReporter extends ScheduledReporter {
         LOGGER.debug("CSV reporter directory is set to {}", reports_home);
     }
 
+    public void setUseCountAsTimestamp(boolean count_as_timestamp) {
+
+        this.count_as_timestamp = count_as_timestamp;
+    }
+
     @Override
     public void report() {
 
-        final long timestamp = System.nanoTime();
-        for (Map.Entry<String, Metric> registered_metric : getRegistry().getRegisteredMetrics().entrySet()) {
+        final long timestamp = getTimeStamp();
+        for (Map.Entry<String, Metric> registered_metric : getRegistry().getRegisteredMetrics()
+                .entrySet()) {
             final String name = registered_metric.getKey();
             final Metric metric = registered_metric.getValue();
 
@@ -93,6 +102,12 @@ public class CsvReporter extends ScheduledReporter {
                 LOGGER.warn("unknown metric {}, named {}: skipped from csv report at time {}", metric, name, timestamp);
             }
         }
+    }
+
+    private long getTimeStamp() {
+
+        final long report_count = report_counter.getAndIncrement();
+        return count_as_timestamp ? report_count : System.nanoTime();
     }
 
     private void reportTimer(long timestamp, String name, Timer timer) {

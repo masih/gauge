@@ -2,7 +2,7 @@ language: java
 
 env:
   global:
-    secure: GpxpEvW7SY8AvUJvAMqQOdZL5BZhtBPGsBfXqwuC+vbaezL6a9wbc9eVYq7rQwUcmjB+QDZGX6qlIURDL4ZlS3caVN0iAAbaC5w1cW70Skc56UI5qZId5FdzpzqcfnDVCYLkBfp6tMY++X8+SOmBd/CLji2kKC50Qw/6HNRwqqY=
+    secure: "ZYzfH65Puql0HwgqBxdem+E+Kdf8vNQkSgnB16ws1LDMO9jnNAlSPUL7sls4jRfrJb3NOvUpWg3SRbE74ruu3iUwF1mGXtXXHcTK6VpStTg7K0XME1/QGsaPOYqZn0wTiI1aZk4ktkjSDw8fZKmg/rH7Kaq45zu3T+C7vjtUodY="
 
 branches:
   only:

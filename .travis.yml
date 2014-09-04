@@ -1,22 +1,17 @@
 language: java
-
 env:
   global:
-    secure: "ZYzfH65Puql0HwgqBxdem+E+Kdf8vNQkSgnB16ws1LDMO9jnNAlSPUL7sls4jRfrJb3NOvUpWg3SRbE74ruu3iUwF1mGXtXXHcTK6VpStTg7K0XME1/QGsaPOYqZn0wTiI1aZk4ktkjSDw8fZKmg/rH7Kaq45zu3T+C7vjtUodY="
-
+    KiHB8RChnl9qhh47+i/ktoJNOxifBK2mksrQWcYo1Q5D3LS30KmDeEHvr9utSsAY3gTk04suIRFgMRqdMxbqcCBK51DO2j7KAmUIoHtyXEooApmhzdYiBS4VAAoJ4SSNVtSpVWz8hZixFSGjbPEO6jsmVRzKR+nhgMPVK8wXx8U=
 branches:
   only:
   - master
-
 before_script:
-  - pwd
-  - cd
-  - git clone https://github.com/github/maven-plugins.git
-  - cd maven-plugins
-  - mvn clean install
-  - cd /home/travis/build/mashti/gauge
-
+- pwd
+- cd
+- git clone https://github.com/github/maven-plugins.git
+- cd maven-plugins
+- mvn clean install
+- cd /home/travis/build/mashti/gauge
 script: mvn clean deploy
-
 notifications:
   email: false

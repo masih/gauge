@@ -36,37 +36,6 @@
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>com.github.github</groupId>
-                <artifactId>site-maven-plugin</artifactId>
-                <version>0.10-SNAPSHOT</version>
-                <configuration>
-                    <message>Maven artifacts for ${project.groupId}:${project.artifactId}:${project.version} ~${maven.build.timestamp}</message>
-                    <outputDirectory>${built.repo.dir}</outputDirectory>
-                    <merge>true</merge>
-                    <repositoryOwner>mashti</repositoryOwner>
-                    <repositoryName>maven</repositoryName>
-                    <branch>refs/heads/gh-pages</branch>
-                    <oauth2Token>ad63d1be73f41655cc6bbbde7bef3c0cc5f1c571</oauth2Token>
-
-                    <includes>
-                        <include>*/**</include>
-                    </includes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>site</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>

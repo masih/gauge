@@ -1,7 +1,7 @@
 language: java
 env:
   global:
-    KiHB8RChnl9qhh47+i/ktoJNOxifBK2mksrQWcYo1Q5D3LS30KmDeEHvr9utSsAY3gTk04suIRFgMRqdMxbqcCBK51DO2j7KAmUIoHtyXEooApmhzdYiBS4VAAoJ4SSNVtSpVWz8hZixFSGjbPEO6jsmVRzKR+nhgMPVK8wXx8U=
+    secure: KiHB8RChnl9qhh47+i/ktoJNOxifBK2mksrQWcYo1Q5D3LS30KmDeEHvr9utSsAY3gTk04suIRFgMRqdMxbqcCBK51DO2j7KAmUIoHtyXEooApmhzdYiBS4VAAoJ4SSNVtSpVWz8hZixFSGjbPEO6jsmVRzKR+nhgMPVK8wXx8U=
 branches:
   only:
   - master

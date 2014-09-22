@@ -53,7 +53,7 @@ public abstract class ScheduledReporter implements Reporter {
                         report();
                     }
                     catch (final Exception e) {
-                        LOGGER.error("failure occured while reporting", e);
+                        LOGGER.error("failure occurred while reporting", e);
                     }
                     finally {
                         LOGGER.debug("reporter stopped for registry {}", registry.getName());

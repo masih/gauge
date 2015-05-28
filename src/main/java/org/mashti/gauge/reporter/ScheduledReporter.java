@@ -1,5 +1,5 @@
 /**
- * This file is part of gauge.
+ * This file is part of gauge copyright.
  *
  * gauge is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
